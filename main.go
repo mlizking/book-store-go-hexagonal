@@ -2,11 +2,12 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"go-course-ep3/models"
+	"go-course-ep3/handlers"
 	"go-course-ep3/repositories"
+	"go-course-ep3/services"
 	"time"
 
+	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -31,29 +32,23 @@ func main() {
 
 	db := initMongo()
 
+	//init Data Layer
 	bookRepo := repositories.NewBookDBRepository(db, "book_stock")
 
-	// bookRepo.Create(models.RepoBookModel{
-	// 	BookID: uuid.New().String(),
-	// 	Title:  "GG",
-	// 	Price:  100,
-	// 	Stock:  20,
-	// })
+	//init Business Logic Layer
+	bookSrv := services.NewBookService(bookRepo)
 
-	res, _ := bookRepo.GetAll()
-	fmt.Println(res)
+	//init Presentation Layer
+	bookHand := handlers.NewBookHandler(bookSrv)
 
-	// bookRepo.Delete("f1b7065e-c1a7-4d07-98eb-5c4bae114452")
+	//framework routes
+	app := fiber.New()
+	app.Get("/books", bookHand.GetAllBook)
+	app.Get("/book/:id", bookHand.GetBookByID)
+	app.Post("/book", bookHand.CreateBook)
+	app.Put("/book/:id", bookHand.UpdateBook)
+	app.Delete("/book/:id", bookHand.DeleteBook)
 
-	bookRepo.Update("0613e971-fa7b-4a16-8032-fbdef6b3d054", models.RepoBookUpdateModel{
-		// Title: "GGX",
-		Price: 149,
-		Stock: 300,
-	})
-
-	res, _ = bookRepo.GetAll()
-	fmt.Println(res)
-
-	// res2, _ := bookRepo.GetById("0613e971-fa7b-4a16-8032-fbdef6b3d054")
-	// fmt.Println(res2)
+	//start server
+	app.Listen(":3000")
 }
