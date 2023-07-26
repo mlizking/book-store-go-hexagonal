@@ -1,0 +1,4 @@
+app:
+  database:
+    uri: 'mongodb+srv://ep5-course:HlT9NpyD4Vt0HtbK@cluster0.vvx397a.mongodb.net/?retryWrites=true&w=majority'
+    dbname: 'BookStore'
